@@ -13,7 +13,6 @@ type Handler struct {
 
 func NewHandler(requestChannel intf.RequestChannel) *Handler {
 	handler := &Handler{requestChannel: requestChannel}
-
 	return handler
 }
 

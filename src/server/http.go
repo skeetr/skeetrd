@@ -79,6 +79,5 @@ func (self *HTTP) buildServer() *http.Server {
 }
 
 func (self *HTTP) goStart() {
-	err := self.server.Serve(self.listener)
-	Critical("Error on HTTP server: %s", err)
+	self.server.Serve(self.listener)
 }

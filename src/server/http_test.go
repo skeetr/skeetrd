@@ -1,6 +1,7 @@
 package server
 
 import (
+	"net/http"
 	"skeetrd/intf"
 	"testing"
 )
@@ -17,10 +18,17 @@ var _ = Suite(&HTTPSuite{})
 func (s *HTTPSuite) TestLoad(c *C) {
 	requestChannel := make(intf.RequestChannel, 1)
 
-	http := NewHTTP(&HTTPConfig{})
-	http.SetProcessChannel(requestChannel)
-	http.Start()
+	server := NewHTTP(&HTTPConfig{
+		Port: 1234,
+		Host: "localhost",
+	})
+
+	server.SetProcessChannel(requestChannel)
+	server.Start()
+
+	http.Get("http://localhost:1234/robots.txt")
 	request := <-requestChannel
-	print(request)
-	http.Stop()
+
+	c.Assert(string(request), HasLen, 490)
+	server.Stop()
 }
