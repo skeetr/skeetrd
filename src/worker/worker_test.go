@@ -6,6 +6,7 @@ import (
 )
 
 import . "launchpad.net/gocheck"
+import "code.google.com/p/go-uuid/uuid"
 
 // Hook up gocheck into the "go test" runner.
 func Test(t *testing.T) { TestingT(t) }
@@ -16,8 +17,9 @@ var _ = Suite(&WorkerSuite{})
 
 func (s *WorkerSuite) TestLoad(c *C) {
 	worker := NewWorker(&WorkerConfig{})
-	worker.SetId("test")
+	worker.SetId(uuid.New()[0:8])
 	worker.Start()
 
 	worker.Process(intf.Request("foo"))
+
 }

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"skeetrd/intf"
 	. "skeetrd/logger"
-	"strings"
+	"time"
 )
 
-//import "github.com/mcuadros/go-command"
+import "github.com/mcuadros/go-command"
 import "github.com/mcuadros/go-defaults"
 
 const (
@@ -15,13 +15,15 @@ const (
 )
 
 type WorkerConfig struct {
-	DBusDestination string `default:"com.github.skeetr.%s"`
+	Script        string `default:"/usr/local/bin/php /tmp/client.php %s"`
+	SocketPattern string `default:"/tmp/skeetrd.%s.sock"`
 }
 
 type Worker struct {
-	id     string
-	config *WorkerConfig
-	dbus   *DBus
+	id      string
+	config  *WorkerConfig
+	rpc     *RPC
+	command *command.Command
 }
 
 func NewWorker(config *WorkerConfig) *Worker {
@@ -32,26 +34,46 @@ func NewWorker(config *WorkerConfig) *Worker {
 }
 
 func (self *Worker) SetId(id string) {
-	self.id = fmt.Sprintf(self.config.DBusDestination, id)
+	self.id = id
 }
 
 func (self *Worker) Start() {
-	self.buildAndConnectDBus()
-
+	self.buildAndRunCommand()
+	self.buildAndConnectRPC()
 	Info("New worker %s started", self.id)
 }
 
-func (self *Worker) buildAndConnectDBus() {
-	path := "/" + strings.Replace(self.id, ".", "/", -1)
-	Info("%s %s at %s", path, self.id, ProcessMethod)
+func (self *Worker) buildAndConnectRPC() {
+	socket := fmt.Sprintf(self.config.SocketPattern, self.id)
 
-	self.dbus = NewDBus(self.id, path)
-	self.dbus.Connect()
+	self.rpc = NewRPC(socket)
+	self.rpc.SetTimeout(1 * time.Second)
+	self.rpc.Connect()
+}
+
+func (self *Worker) buildAndRunCommand() {
+	cmd := fmt.Sprintf(self.config.Script, self.id)
+	self.command = command.NewCommand(cmd)
+
+	if err := self.command.Run(); err != nil {
+		Error("Error %s, executing: %s", err, cmd)
+	}
+
+	go self.goWaitCommaint()
+	Debug("Running %s", cmd)
+}
+
+func (self *Worker) goWaitCommaint() {
+	if err := self.command.Wait(); err != nil {
+		panic(err)
+	}
 }
 
 func (self *Worker) Process(request intf.Request) {
 	var response string
-	self.dbus.Call(ProcessMethod, string(request)).Store(&response)
+	Debug("Calling method: %s", ProcessMethod)
+
+	self.rpc.Call(ProcessMethod, string(request), &response)
 
 	Debug("Response: %s", response)
 }
