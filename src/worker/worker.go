@@ -9,6 +9,7 @@ import (
 
 import "github.com/mcuadros/go-command"
 import "github.com/mcuadros/go-defaults"
+import "code.google.com/p/go-uuid/uuid"
 
 const (
 	ProcessMethod = "process"
@@ -37,10 +38,21 @@ func (self *Worker) SetId(id string) {
 	self.id = id
 }
 
+func (self *Worker) GetId() string {
+	return self.id
+}
+
 func (self *Worker) Start() {
+	self.generateIdIfNeeded()
 	self.buildAndRunCommand()
 	self.buildAndConnectRPC()
 	Info("New worker %s started", self.id)
+}
+
+func (self *Worker) generateIdIfNeeded() {
+	if self.id == "" {
+		self.id = uuid.New()[0:8]
+	}
 }
 
 func (self *Worker) buildAndConnectRPC() {
@@ -69,11 +81,11 @@ func (self *Worker) goWaitCommaint() {
 	}
 }
 
-func (self *Worker) Process(request intf.Request) {
+func (self *Worker) Process(request *intf.Request) {
 	var response string
 	Debug("Calling method: %s", ProcessMethod)
 
-	self.rpc.Call(ProcessMethod, string(request), &response)
+	self.rpc.Call(ProcessMethod, request, &response)
 
 	Debug("Response: %s", response)
 }

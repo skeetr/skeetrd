@@ -6,7 +6,6 @@ import (
 )
 
 import . "launchpad.net/gocheck"
-import "code.google.com/p/go-uuid/uuid"
 
 // Hook up gocheck into the "go test" runner.
 func Test(t *testing.T) { TestingT(t) }
@@ -17,20 +16,38 @@ var _ = Suite(&WorkerSuite{})
 
 func (s *WorkerSuite) TestLoad(c *C) {
 	worker := NewWorker(&WorkerConfig{})
-	worker.SetId(uuid.New()[0:8])
 	worker.Start()
 
-	worker.Process(intf.Request("foo"))
+	request := intf.Request{
+		Method: "GET",
+		Host:   "example.org",
+		Header: map[string][]string{
+			"Accept-Encoding": {"gzip, deflate"},
+			"Accept-Language": {"en-us"},
+			"Connection":      {"keep-alive"},
+		},
+	}
+
+	worker.Process(&request)
 
 }
 
 func BenchmarkBigLen(b *testing.B) {
 	worker := NewWorker(&WorkerConfig{})
-	worker.SetId(uuid.New()[0:8])
 	worker.Start()
+
+	request := intf.Request{
+		Method: "GET",
+		Host:   "example.org",
+		Header: map[string][]string{
+			"Accept-Encoding": {"gzip, deflate"},
+			"Accept-Language": {"en-us"},
+			"Connection":      {"keep-alive"},
+		},
+	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		worker.Process(intf.Request("foo"))
+		worker.Process(&request)
 	}
 }

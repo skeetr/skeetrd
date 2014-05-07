@@ -1,3 +1,7 @@
 package intf
 
-type Request []byte
+import (
+	"net/http"
+)
+
+type Request http.Request
