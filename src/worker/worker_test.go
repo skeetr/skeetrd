@@ -23,3 +23,14 @@ func (s *WorkerSuite) TestLoad(c *C) {
 	worker.Process(intf.Request("foo"))
 
 }
+
+func BenchmarkBigLen(b *testing.B) {
+	worker := NewWorker(&WorkerConfig{})
+	worker.SetId(uuid.New()[0:8])
+	worker.Start()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		worker.Process(intf.Request("foo"))
+	}
+}
