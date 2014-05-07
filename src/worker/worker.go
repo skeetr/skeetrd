@@ -108,4 +108,5 @@ func (self *Worker) Kill() {
 	self.rpc.Call(KillMethod, nil, &response)
 
 	Debug("[%s] Response: %s", KillMethod, response)
+	self.command.Kill()
 }
