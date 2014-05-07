@@ -23,13 +23,10 @@ func NewRPC(socket string) *RPC {
 }
 
 func (self *RPC) Connect() error {
-	client, err := self.buildClient()
-	if err != nil {
-		Info("%s", err)
+	if err := self.buildClient(); err != nil {
 		return err
 	}
 
-	self.client = client
 	return nil
 }
 
@@ -37,30 +34,28 @@ func (self *RPC) SetTimeout(timeout time.Duration) {
 	self.timeout = timeout
 }
 
-func (self *RPC) buildClient() (*rpc.Client, error) {
+func (self *RPC) buildClient() error {
 	if err := self.isSockectAvailable(); err != nil {
-		return nil, err
+		return err
 	}
 
 	client, err := jsonrpc.Dial("unix", self.socket)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	self.connected = true
+	self.client = client
 
-	return client, nil
+	return nil
 }
 
-func (self *RPC) Call(method string, args interface{}, reply interface{}) {
-	if !self.connected {
-		return
+func (self *RPC) Call(method string, args interface{}, reply interface{}) error {
+	if !self.connected || self.client == nil {
+		return nil
 	}
 
-	err := self.client.Call(method, args, &reply)
-	if err != nil {
-		Error("Error: %s, callingto %s", self.socket, method)
-	}
+	return self.client.Call(method, args, &reply)
 }
 
 func (self *RPC) isSockectAvailable() error {

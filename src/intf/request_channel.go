@@ -1,3 +1,7 @@
 package intf
 
-type RequestChannel chan Request
+import (
+	"net/http"
+)
+
+type RequestChannel chan http.Request

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"fmt"
+	"net/http"
 	"skeetrd/intf"
 	. "skeetrd/logger"
 	"time"
@@ -13,6 +14,7 @@ import "code.google.com/p/go-uuid/uuid"
 
 const (
 	ProcessMethod = "process"
+	KillMethod    = "kill"
 )
 
 type WorkerConfig struct {
@@ -42,11 +44,19 @@ func (self *Worker) GetId() string {
 	return self.id
 }
 
-func (self *Worker) Start() {
+func (self *Worker) Start() error {
 	self.generateIdIfNeeded()
-	self.buildAndRunCommand()
-	self.buildAndConnectRPC()
+
+	if err := self.buildAndRunCommand(); err != nil {
+		return err
+	}
+
+	if err := self.buildAndConnectRPC(); err != nil {
+		return err
+	}
+
 	Info("New worker %s started", self.id)
+	return nil
 }
 
 func (self *Worker) generateIdIfNeeded() {
@@ -55,24 +65,27 @@ func (self *Worker) generateIdIfNeeded() {
 	}
 }
 
-func (self *Worker) buildAndConnectRPC() {
+func (self *Worker) buildAndConnectRPC() error {
 	socket := fmt.Sprintf(self.config.SocketPattern, self.id)
 
 	self.rpc = NewRPC(socket)
 	self.rpc.SetTimeout(1 * time.Second)
-	self.rpc.Connect()
+
+	return self.rpc.Connect()
 }
 
-func (self *Worker) buildAndRunCommand() {
+func (self *Worker) buildAndRunCommand() error {
 	cmd := fmt.Sprintf(self.config.Script, self.id)
 	self.command = command.NewCommand(cmd)
 
 	if err := self.command.Run(); err != nil {
-		Error("Error %s, executing: %s", err, cmd)
+		return fmt.Errorf("Error %s, executing: %s", err, cmd)
 	}
 
 	go self.goWaitCommaint()
 	Debug("Running %s", cmd)
+
+	return nil
 }
 
 func (self *Worker) goWaitCommaint() {
@@ -81,11 +94,18 @@ func (self *Worker) goWaitCommaint() {
 	}
 }
 
-func (self *Worker) Process(request *intf.Request) {
-	var response string
-	Debug("Calling method: %s", ProcessMethod)
-
+func (self *Worker) Process(request *http.Request) *intf.Response {
+	var response intf.Response
 	self.rpc.Call(ProcessMethod, request, &response)
 
-	Debug("Response: %s", response)
+	Debug("[%s] Response: %s", ProcessMethod, response)
+
+	return &response
+}
+
+func (self *Worker) Kill() {
+	var response bool
+	self.rpc.Call(KillMethod, nil, &response)
+
+	Debug("[%s] Response: %s", KillMethod, response)
 }
