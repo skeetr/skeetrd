@@ -1,4 +1,4 @@
-package worker
+package skeetrd
 
 import (
 	"net/http"

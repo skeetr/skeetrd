@@ -1,10 +1,8 @@
-package worker
+package skeetrd
 
 import (
 	"fmt"
 	"net/http"
-	"skeetrd/intf"
-	. "skeetrd/logger"
 	"time"
 )
 
@@ -94,8 +92,8 @@ func (self *Worker) goWaitCommaint() {
 	}
 }
 
-func (self *Worker) Process(request *http.Request) *intf.Response {
-	var response intf.Response
+func (self *Worker) Process(request *http.Request) *Response {
+	var response Response
 	self.rpc.Call(ProcessMethod, request, &response)
 
 	Debug("[%s] Response: %s", ProcessMethod, response)

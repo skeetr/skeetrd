@@ -1,19 +1,21 @@
-package server
+package skeetrd
 
 import (
+	"fmt"
 	"net/http"
-	"skeetrd/intf"
 )
 
 type Handler struct {
-	requestChannel intf.RequestChannel
+	pool *Pool
 }
 
-func NewHandler(requestChannel intf.RequestChannel) *Handler {
-	handler := &Handler{requestChannel: requestChannel}
+func NewHandler(pool *Pool) *Handler {
+	handler := &Handler{pool: pool}
 	return handler
 }
 
 func (self *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	self.requestChannel <- request
+	response := self.pool.Process(request)
+
+	fmt.Fprintf(writer, "Hello, %q", response.Body)
 }

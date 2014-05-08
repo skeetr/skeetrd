@@ -1,4 +1,4 @@
-package harvesterd
+package skeetrd
 
 import (
 	"testing"

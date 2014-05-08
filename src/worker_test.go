@@ -1,16 +1,12 @@
-package worker
+package skeetrd
 
 import (
 	"bytes"
 	"net/http"
-
 	"testing"
 )
 
 import . "launchpad.net/gocheck"
-
-// Hook up gocheck into the "go test" runner.
-func Test(t *testing.T) { TestingT(t) }
 
 type WorkerSuite struct{}
 

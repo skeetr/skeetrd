@@ -1,11 +1,10 @@
-package worker
+package skeetrd
 
 import (
 	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
-	. "skeetrd/logger"
 	"time"
 )
 

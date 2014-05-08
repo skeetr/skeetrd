@@ -1,15 +1,14 @@
-package worker
+package skeetrd
 
 import (
 	"net/http"
-	"skeetrd/intf"
 )
 
 import "github.com/mcuadros/go-defaults"
 
 type workerRequest struct {
 	httpRequest  *http.Request
-	responseChan chan *intf.Response
+	responseChan chan *Response
 }
 
 type PoolConfig struct {
@@ -64,8 +63,8 @@ func (self *Pool) waitForRequest(worker *Worker) {
 	}
 }
 
-func (self *Pool) Process(request *http.Request) *intf.Response {
-	responseChan := make(chan *intf.Response, 1)
+func (self *Pool) Process(request *http.Request) *Response {
+	responseChan := make(chan *Response, 1)
 
 	self.channel <- workerRequest{
 		httpRequest:  request,

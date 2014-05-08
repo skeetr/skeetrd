@@ -1,4 +1,4 @@
-package logger
+package skeetrd
 
 import (
 	"log"

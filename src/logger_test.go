@@ -1,13 +1,6 @@
-package logger
-
-import (
-	"testing"
-)
+package skeetrd
 
 import . "launchpad.net/gocheck"
-
-// Hook up gocheck into the "go test" runner.
-func Test(t *testing.T) { TestingT(t) }
 
 type LoggerSuite struct{}
 

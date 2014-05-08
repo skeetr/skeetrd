@@ -1,13 +1,9 @@
-package harvesterd
-
-import (
-	"harvesterd/logger"
-)
+package skeetrd
 
 import "code.google.com/p/gcfg"
 
 type Config struct {
-	Section logger.LoggerConfig
+	Section LoggerConfig
 }
 
 var configInstance *Config = new(Config)
@@ -19,13 +15,13 @@ func GetConfig() *Config {
 func (self *Config) Load(ini string) {
 	err := gcfg.ReadStringInto(self, ini)
 	if err != nil {
-		logger.Critical("error: cannot parse config", err)
+		Critical("error: cannot parse config", err)
 	}
 }
 
 func (self *Config) LoadFile(filename string) {
 	err := gcfg.ReadFileInto(self, filename)
 	if err != nil {
-		logger.Critical("erro:", err)
+		Critical("erro:", err)
 	}
 }
