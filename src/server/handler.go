@@ -1,10 +1,8 @@
 package server
 
 import (
-	"encoding/json"
 	"net/http"
 	"skeetrd/intf"
-	. "skeetrd/logger"
 )
 
 type Handler struct {

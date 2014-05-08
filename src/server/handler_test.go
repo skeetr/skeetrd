@@ -22,7 +22,7 @@ func (s *HandlerSuite) TestServeHTTP(c *C) {
 	handler.ServeHTTP(writer, request)
 
 	result := <-requestChannel
-	c.Assert(string(result), HasLen, 367)
+	c.Assert(result.Method, Equals, "GET")
 }
 
 type TestWriter struct {

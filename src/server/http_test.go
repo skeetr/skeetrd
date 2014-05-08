@@ -29,6 +29,6 @@ func (s *HTTPSuite) TestLoad(c *C) {
 	http.Get("http://localhost:1234/robots.txt")
 	request := <-requestChannel
 
-	c.Assert(string(request), HasLen, 490)
+	c.Assert(request.Method, Equals, "GET")
 	server.Stop()
 }

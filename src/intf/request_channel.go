@@ -4,4 +4,4 @@ import (
 	"net/http"
 )
 
-type RequestChannel chan http.Request
+type RequestChannel chan *http.Request
