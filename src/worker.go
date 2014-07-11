@@ -11,7 +11,7 @@ import "github.com/mcuadros/go-defaults"
 import "code.google.com/p/go-uuid/uuid"
 
 const (
-	ProcessMethod = "process"
+	ProcessMethod = "Process"
 	KillMethod    = "kill"
 )
 
@@ -65,6 +65,7 @@ func (self *Worker) generateIdIfNeeded() {
 
 func (self *Worker) buildAndConnectRPC() error {
 	socket := fmt.Sprintf(self.config.SocketPattern, self.id)
+	socket = "/tmp/foo.sock"
 
 	self.rpc = NewRPC(socket)
 	self.rpc.SetTimeout(1 * time.Second)
@@ -93,6 +94,10 @@ func (self *Worker) goWaitCommaint() {
 }
 
 func (self *Worker) Process(request *http.Request) *Response {
+	if request.Method == "POST" || request.Method == "PUT" {
+		request.ParseForm()
+	}
+
 	var response Response
 	self.rpc.Call(ProcessMethod, request, &response)
 
